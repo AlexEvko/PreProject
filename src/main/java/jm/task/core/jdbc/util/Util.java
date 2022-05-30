@@ -1,29 +1,20 @@
 package jm.task.core.jdbc.util;
 
+import jm.task.core.jdbc.dao.UserDaoHibernateImpl;
+import jm.task.core.jdbc.model.User;
+import jm.task.core.jdbc.service.UserServiceImpl;
+import org.hibernate.HibernateException;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
+import org.hibernate.cfg.Configuration;
+
 import java.sql.*;
+import java.util.Properties;
 
 public class Util {
-//    private static final String DRIVER = "com.mysql.cj.jdbc.Driver";
-//    private static final String URL = "jdbc:mysql://localhost:3306/jdbc";
-//    private static final String USER_NAME = "user";
-//    private static final String PASSWORD = "12345";
-//
-//    public static Connection getConnection(){
-//        Connection connection = null;
-//
-//        try {
-//            Class.forName(DRIVER);
-//            connection = DriverManager.getConnection(URL, USER_NAME, PASSWORD);
-//        } catch (ClassNotFoundException | SQLException e) {
-//            e.printStackTrace();
-//        }
-//
-//        return connection;
-//    }
-//
-//}
 
-    public static Connection getDBConnection() throws SQLException {
+    /*public static Connection getDBConnection() throws SQLException {
         Connection dbConnection = null;
         try {
             dbConnection = DriverManager.getConnection(
@@ -34,6 +25,40 @@ public class Util {
             e.printStackTrace();
         }
         return dbConnection;
+    }*/
+    // то для jdbc открыть
+    private static final String URL = "jdbc:postgresql://localhost:5432/postgres";
+    private static final String USERNAME = "postgres";
+    private static final String PASSWORD = "postgres";
+    private static final String DIALECT = "org.hibernate.dialect.PostgreSQL95Dialect";
+
+    private static final SessionFactory concreteSessionFactory;
+    static {
+        try {
+            Properties prop = new Properties();
+            prop.setProperty("hibernate.connection.url",URL);
+            prop.setProperty("hibernate.connection.username", USERNAME);
+            prop.setProperty("hibernate.connection.password", PASSWORD);
+            prop.setProperty("dialect", DIALECT);
+            //prop.setProperty("show_sql", "true");
+
+            prop.setProperty("hibernate.hbm2ddl.auto", "create");
+            //ниже для 4 хибера
+            /*Configuration configuration = new Configuration().addProperties(prop);
+            SessionFactory sf = configuration.buildSessionFactory(
+                    new StandardServiceRegistryBuilder()
+                            .applySettings(prop)
+                            .build());*/
+            concreteSessionFactory = new org.hibernate.cfg.Configuration()
+                    .addProperties(prop)
+                    .addAnnotatedClass(User.class)
+                    .buildSessionFactory();
+        }
+        catch (Exception ex) {
+            throw new ExceptionInInitializerError(ex);
+        }
     }
-    // реализуйте настройку соединения с БД
+    public static Session getSession() throws HibernateException {
+        return concreteSessionFactory.openSession();
+    }
 }

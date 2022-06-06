@@ -63,17 +63,11 @@ public class UserDaoHibernateImpl implements UserDao {
     }
 
     @Override
-    public void saveUser(String name, String lastName, byte age) {
-        int count = 0;
-        User user = null;
+    public void saveUser(User user) {
         Session session = Util.getSession();
         Transaction transaction = null;
         try {
             transaction = session.beginTransaction();
-            user = new User();
-            user.setName(name);
-            user.setLastName(lastName);
-            user.setAge(age);
             session.save(user);
             transaction.commit();
         }
@@ -114,7 +108,7 @@ public class UserDaoHibernateImpl implements UserDao {
         Transaction transaction = null;
         try {
             transaction = session.beginTransaction();
-            List<User> users = (List<User>) session.createNativeQuery("SELECT*FROM users",User.class).list();
+            List<User> users = session.createNativeQuery("SELECT*FROM users",User.class).list();
             transaction.commit();
             return users;
         }
